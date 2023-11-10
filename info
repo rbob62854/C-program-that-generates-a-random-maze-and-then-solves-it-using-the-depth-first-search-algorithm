@@ -1,0 +1,98 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+// Define maze size
+const int rows = 5;
+const int cols = 5;
+
+// Define maze cells
+const char EMPTY = ' ';
+const char WALL = '#';
+const char START = 'S';
+const char END = 'E';
+const char PATH = '.';
+
+// Function to print the maze
+void printMaze(const std::vector<std::vector<char>>& maze) {
+    for (const auto& row : maze) {
+        for (char cell : row) {
+            std::cout << cell << ' ';
+        }
+        std::cout << '\n';
+    }
+}
+
+// Function to check if a cell is within the maze boundaries
+bool isValid(int x, int y) {
+    return x >= 0 && x < rows && y >= 0 && y < cols;
+}
+
+// Function to generate a random maze
+void generateMaze(std::vector<std::vector<char>>& maze) {
+    // Initialize maze with walls
+    maze.assign(rows, std::vector<char>(cols, WALL));
+
+    // Set random start and end points
+    int startX = rand() % rows;
+    int startY = rand() % cols;
+    int endX = rand() % rows;
+    int endY = rand() % cols;
+
+    maze[startX][startY] = START;
+    maze[endX][endY] = END;
+}
+
+// Depth-first search algorithm to solve the maze
+bool solveMaze(std::vector<std::vector<char>>& maze, int x, int y) {
+    // Check if current cell is outside the maze boundaries or is a wall
+    if (!isValid(x, y) || maze[x][y] == WALL) {
+        return false;
+    }
+
+    // Check if current cell is the end of the maze
+    if (maze[x][y] == END) {
+        return true;
+    }
+
+    // Mark the current cell as part of the path
+    maze[x][y] = PATH;
+
+    // Explore neighbors in a random order
+    int directions[] = {-1, 0, 1, 0, 0, -1, 0, 1};
+    for (int i = 0; i < 4; ++i) {
+        int newX = x + directions[i * 2];
+        int newY = y + directions[i * 2 + 1];
+        if (solveMaze(maze, newX, newY)) {
+            return true;
+        }
+    }
+
+    // If none of the neighbors lead to the end, backtrack
+    maze[x][y] = EMPTY;
+    return false;
+}
+
+int main() {
+    // Seed the random number generator
+    std::srand(std::time(0));
+
+    // Create and generate a random maze
+    std::vector<std::vector<char>> maze;
+    generateMaze(maze);
+
+    // Print the initial maze
+    std::cout << "Original Maze:\n";
+    printMaze(maze);
+
+    // Solve the maze
+    if (solveMaze(maze, 0, 0)) {
+        std::cout << "\nSolved Maze:\n";
+        printMaze(maze);
+    } else {
+        std::cout << "\nNo solution found.\n";
+    }
+
+    return 0;
+}
